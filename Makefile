@@ -1,8 +1,8 @@
 CC=gcc
 CFLAGS=-I.
 DEPS=
-OBJ=server.o
-USERID=123456789
+OBJ=webserver.o
+USERID=105383173
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
