@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-I.
 DEPS=
-OBJ=webserver.o
+OBJ=server.o
 USERID=105383173
 
 %.o: %.c $(DEPS)
