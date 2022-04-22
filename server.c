@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
     }
 
     while (1) { /* main accept() loop */
-        // addrlen = sizeof(struct sockaddr_in);
         /* accept a new connection */
         if ((newfd = accept(socketfd, (struct sockaddr*) &client_addr, &addrlen)) == -1){
             perror("accept");
@@ -175,10 +174,10 @@ void create_response(char* filename, char* type, int fd, FILE* file){
     write(fd, header, strlen(header));
 
     if(type == NULL) { // binary file
-        //
         fclose(file);
         FILE* binary_fd = fopen(filename, "rb");
         unsigned char buffer[st.st_size + 1];
+        memset(buffer, 0, st.st_size + 1);
         if(fread(buffer,sizeof(buffer),1,binary_fd) == -1){
             perror(strerror(errno));
             exit(1);
@@ -188,6 +187,7 @@ void create_response(char* filename, char* type, int fd, FILE* file){
     }
     else{
         unsigned char buffer[st.st_size + 1];
+        memset(buffer, 0, st.st_size + 1);
         if(fread(buffer,sizeof(buffer),1,file) == -1){
             perror(strerror(errno));
             exit(1);
