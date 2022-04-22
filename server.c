@@ -119,7 +119,9 @@ void respond(int fd)
     if(ext != NULL){
         filetype = ext + 1;
     }
-    printf("the filetype is %s", filetype);
+    if filetype != NULL{
+        printf("the filetype is %s", filetype);
+    }
 
     create_response(filename, filetype, fd, file);
 
@@ -132,10 +134,15 @@ void create_response(char* filename, char* type, int fd, FILE* file){
     char* status = "HTTP/1.1 200 OK\r\n";
     char* connection = "Connection: close\r\n";
     char date[LINE_SIZE];
+    memset(date, 0, LINE_SIZE);
     char* server = "Server: Apache/2.2.3 (CentOS)\r\n";
     char last_modified[LINE_SIZE];
+    memset(last_modified, 0, LINE_SIZE);
     char content_length[LINE_SIZE];
+    memset(content_length, 0, LINE_SIZE);
     char content_type[LINE_SIZE];
+    memset(content_type, 0, LINE_SIZE);
+
 
     // date 
     time_t now = time(0);
