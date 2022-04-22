@@ -119,7 +119,7 @@ void respond(int fd)
     if(ext != NULL){
         filetype = ext + 1;
     }
-    if filetype != NULL{
+    if (filetype != NULL) {
         printf("the filetype is %s", filetype);
     }
 
