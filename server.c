@@ -20,6 +20,7 @@ void create_response(char* filename, char* type, int fd, FILE* file);
 void respond(int fd);
 char* parse_blank_space(char* filename);
 char newbuf[256];
+
 int main(int argc, char *argv[])
 {
     int addrlen;
@@ -50,8 +51,7 @@ int main(int argc, char *argv[])
     myaddr.sin_port = htons(MYPORT); 
     myaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
     memset(myaddr.sin_zero, '\0', sizeof(myaddr.sin_zero));
-    char newbuf[256];
-    memset(newbuf, 0, strlen(newbuf)+1);
+
     /* bind the socket */
     if (bind(socketfd, (struct sockaddr *) &myaddr, sizeof(struct sockaddr_in)) == -1) {
         perror("bind");
@@ -64,7 +64,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    while (1) { /* main accept() loop */
+    /* server running */
+    while (1) { 
         /* accept a new connection */
         if ((newfd = accept(socketfd, (struct sockaddr*) &client_addr, &addrlen)) == -1){
             perror("accept");
@@ -79,13 +80,10 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-
-
-//parse http request to get filename 
+/* parse http request to get filename */
 void respond(int fd)
 {
     printf("begin");
-    //char delim = " "; 
 	char buf[BUFFER_SIZE];
     memset(buf, 0, BUFFER_SIZE);
 	char* filename = NULL;
@@ -96,10 +94,10 @@ void respond(int fd)
         exit(1);
 	}
     printf("read");
-    //split http request by whitespace
+
+    /* split http request by whitespace */
     filename = strtok(buf, " "); // tokenize the C string
     filename = strtok(NULL, " "); // continue to tokenize the string
-    //extract second token
 	filename++;  // filename is now a pointer to the second token
 
     if(filename==NULL){
@@ -110,11 +108,10 @@ void respond(int fd)
     printf("the filename is %s\n", filename);
     printf("the parsed_filename is %s\n", parsed_filename);
     
-    //send message
-    //char* errbuf = "<!DOCTYPE html><html><body><h1>404 not found</h1></body></html>";
+    /* send message */
     FILE* file = fopen(parsed_filename,"r");
     
-	//find type 
+	/* find type */
     if (file == NULL){ 
         parsed_filename = "404.html";
         file = fopen(parsed_filename, "r");
@@ -129,15 +126,20 @@ void respond(int fd)
         printf("the filetype is %s", filetype);
     }
 
-    create_response(parsed_filename, filetype, fd, file);
-
-    // header:  HTTP version, status code, content type, and content length are required. 
-    
+    create_response(parsed_filename, filetype, fd, file);    
 }
 
 void create_response(char* filename, char* type, int fd, FILE* file){
+    /* create http header */
+    // header:  HTTP version, status code, content type, and content length are required. 
     int LINE_SIZE = 128;
-    char* status = "HTTP/1.1 200 OK\r\n";
+    char* status;
+    if (filename != "404.html"){
+        status = "HTTP/1.1 200 OK\r\n";
+    }
+    else{
+        status = "HTTP/1.1 404 Not Found\r\n";
+    }
     char* connection = "Connection: close\r\n";
     char date[LINE_SIZE];
     memset(date, 0, LINE_SIZE);
@@ -149,31 +151,25 @@ void create_response(char* filename, char* type, int fd, FILE* file){
     char content_type[LINE_SIZE];
     memset(content_type, 0, LINE_SIZE);
 
-    //handling empty file
-	if (file == NULL){
-
-		//write(fd,errbuf,strlen(errbuf)+1);
-		//return;
-	}
-
-    // date 
+    /* date */ 
     time_t now = time(0);
     struct tm tm = *gmtime(&now);
     strftime(date, sizeof(date), "Date: %a, %d %b %Y %H:%M:%S %Z\r\n", &tm);
 
-    // last-modified
+    /* last-modified */
     struct tm last_modified_time;
 	struct stat st;
 	stat(filename,&st);
 	last_modified_time = *gmtime(&(st.st_mtime));
 	strftime(last_modified, sizeof(last_modified),"Last-Modified: %a, %d %b %Y %H:%M:%S %Z\r\n", &last_modified_time);
 
-    // content_length
+    /* content_length */
 	snprintf(content_length,sizeof(content_length),"Content-Length: %lu\r\n",st.st_size);
 
-    // content-type
+    /* content-type */
     snprintf(content_type,sizeof(content_type),format_type_http(type) );
 
+    /* assemble header */
     char header[1000];
     strcpy(header, status);
     strcat(header, connection);
@@ -186,6 +182,7 @@ void create_response(char* filename, char* type, int fd, FILE* file){
 	printf("HTTP response message:\r\n\r\n%s",header);
     write(fd, header, strlen(header));
 
+    /* write file */
     if(type == NULL) { // binary file
         fclose(file);
         FILE* binary_fd = fopen(filename, "rb");
@@ -198,7 +195,7 @@ void create_response(char* filename, char* type, int fd, FILE* file){
         write(fd, buffer, st.st_size + 1);
         fclose(binary_fd);
     }
-    else{
+    else{ // file with extension 
         unsigned char buffer[st.st_size + 1];
         memset(buffer, 0, st.st_size + 1);
         if(fread(buffer,sizeof(buffer),1,file) == -1){
@@ -210,6 +207,7 @@ void create_response(char* filename, char* type, int fd, FILE* file){
     }
  
 }
+
 char* format_type_http(char* filetype)
 { 
     if(filetype == NULL){
@@ -236,24 +234,9 @@ char* format_type_http(char* filetype)
 
 }
 
+/* replace %20 with a blank space in filename */
 char* parse_blank_space(char* filename)
 {
-    // char ret[strlen(filename) + 1]; 
-    // memset(ret, 0, strlen(filename) + 1);
-    // int i; 
-    // int j = 0; 
-    // for(i = 0; i < strlen(filename) + 1; i++) { 
-    //     if (filename[i] != '%'){ 
-    //         ret[j] = filename[i];
-    //     }
-    //     else if (i + 2 < strlen(filename) && filename[i+ 1] == '2' && filename[i+2] == '0'){
-    //         ret[i] = ' ';
-    //         i = i + 2;
-    //     }
-    //     j++ ;
-    // }
-    // return ret; 
-
     char* p;
     int start = 0;
     char* blank = " ";
