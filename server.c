@@ -19,7 +19,7 @@ char* format_type_http(char* filetype);
 void create_response(char* filename, char* type, int fd, FILE* file);
 void respond(int fd);
 char* parse_blank_space(char* filename);
-
+char newbuf[256];
 int main(int argc, char *argv[])
 {
     int addrlen;
@@ -253,6 +253,7 @@ char* parse_blank_space(char* filename)
     int start = 0;
     char* blank = " ";
     int flag = 0;
+    memset(newbuf, 0, strlen(newbuf)+1);
     for (p = filename; *p != '\0'; p+=1) {
         if(*p != '%'){
             if(flag==1){
