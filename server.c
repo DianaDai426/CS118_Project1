@@ -111,11 +111,11 @@ void respond(int fd)
     printf("the parsed_filename is %s\n", parsed_filename);
     
     //send message
-    char* errbuf = "404 Not Found";
+    char* errbuf = "<h1>404 Not Found<h1>";
     FILE* file = fopen(parsed_filename,"r");
     //handling empty file
 	if (file == NULL){
-		write(fd,errbuf,sizeof(errbuf));
+		write(fd,errbuf,strlen(errbuf)+1);
 		return;
 	}
     
