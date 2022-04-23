@@ -100,6 +100,11 @@ void respond(int fd)
     filename = strtok(NULL, " "); // continue to tokenize the string
     //extract second token
 	filename++;  // filename is now a pointer to the second token
+
+    if(filename==NULL){
+        printf("filename is NULL\n");
+        exit(1);
+    }
     char* parsed_filename = parse_blank_space(filename);
     printf("the filename is %s", parsed_filename);
     
