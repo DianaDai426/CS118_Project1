@@ -251,8 +251,6 @@ char* parse_blank_space(char* filename)
 
     char* p;
     int start = 0;
-    char newbuf[256];
-    memset(newbuf, 0, strlen(newbuf)+1);
     char* blank = " ";
     int flag = 0;
     for (p = filename; *p != '\0'; p+=1) {
