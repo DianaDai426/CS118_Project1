@@ -106,7 +106,8 @@ void respond(int fd)
         exit(1);
     }
     char* parsed_filename = parse_blank_space(filename);
-    printf("the filename is %s", parsed_filename);
+    printf("the filename is %s\n", filename);
+    printf("the parsed_filename is %s\n", parsed_filename);
     
     //send message
     char* errbuf = "404 Not Found";
