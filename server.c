@@ -50,7 +50,8 @@ int main(int argc, char *argv[])
     myaddr.sin_port = htons(MYPORT); 
     myaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
     memset(myaddr.sin_zero, '\0', sizeof(myaddr.sin_zero));
-    
+    char newbuf[256];
+    memset(newbuf, 0, strlen(newbuf)+1);
     /* bind the socket */
     if (bind(socketfd, (struct sockaddr *) &myaddr, sizeof(struct sockaddr_in)) == -1) {
         perror("bind");
