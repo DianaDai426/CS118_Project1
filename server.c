@@ -18,7 +18,7 @@
 char* format_type_http(char* filetype);
 void create_response(char* filename, char* type, int fd, FILE* file);
 void respond(int fd);
-
+char* parse_blank_space(char* filename);
 
 int main(int argc, char *argv[])
 {
@@ -100,11 +100,12 @@ void respond(int fd)
     filename = strtok(NULL, " "); // continue to tokenize the string
     //extract second token
 	filename++;  // filename is now a pointer to the second token
-    printf("the filename is %s", filename);
+    char* parsed_filename = parse_blank_space(filename);
+    printf("the filename is %s", parsed_filename);
     
     //send message
     char* errbuf = "404 Not Found";
-    FILE* file = fopen(filename,"r");
+    FILE* file = fopen(parsed_filename,"r");
     //handling empty file
 	if (file == NULL){
 		write(fd,errbuf,sizeof(errbuf));
@@ -122,7 +123,7 @@ void respond(int fd)
         printf("the filetype is %s", filetype);
     }
 
-    create_response(filename, filetype, fd, file);
+    create_response(parsed_filename, filetype, fd, file);
 
     // header:  HTTP version, status code, content type, and content length are required. 
     
@@ -223,5 +224,21 @@ char* format_type_http(char* filetype)
 
 }
 
-
-
+char* parse_blank_space(char* filename)
+{
+    char ret[strlen(filename) + 1]; 
+    memset(ret, 0, strlen(filename) + 1);
+    int i; 
+    int j = 0; 
+    for(i = 0; i < strlen(filename) + 1; i++) { 
+        if (filename[i] != '%'){ 
+            ret[j] = filename[i];
+        }
+        else if (i + 2 < strlen(filename) && filename[i+ 1] == '2' && filename[i+2] == '0'){
+            ret[i] = ' ';
+            i = i + 2;
+        }
+        j++ ;
+    }
+    return ret; 
+}
