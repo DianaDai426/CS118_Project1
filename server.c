@@ -226,19 +226,42 @@ char* format_type_http(char* filetype)
 
 char* parse_blank_space(char* filename)
 {
-    char ret[strlen(filename) + 1]; 
-    memset(ret, 0, strlen(filename) + 1);
-    int i; 
-    int j = 0; 
-    for(i = 0; i < strlen(filename) + 1; i++) { 
-        if (filename[i] != '%'){ 
-            ret[j] = filename[i];
-        }
-        else if (i + 2 < strlen(filename) && filename[i+ 1] == '2' && filename[i+2] == '0'){
-            ret[i] = ' ';
-            i = i + 2;
-        }
-        j++ ;
+    // char ret[strlen(filename) + 1]; 
+    // memset(ret, 0, strlen(filename) + 1);
+    // int i; 
+    // int j = 0; 
+    // for(i = 0; i < strlen(filename) + 1; i++) { 
+    //     if (filename[i] != '%'){ 
+    //         ret[j] = filename[i];
+    //     }
+    //     else if (i + 2 < strlen(filename) && filename[i+ 1] == '2' && filename[i+2] == '0'){
+    //         ret[i] = ' ';
+    //         i = i + 2;
+    //     }
+    //     j++ ;
+    // }
+    // return ret; 
+
+    char* p;
+    int start = 0;
+    char newbuf[256];
+    memset(newbuf, 0, strlen(newbuf)+1);
+    char* blank = " ";
+    int flag = 0;
+    for (p = filename; *p != '\0'; p+=1) {
+        if(*p != '%'){
+            if(flag==1){
+                strncat(newbuf, p, 1);
+            }else{
+                strncpy(newbuf, p, 1);
+                flag = 1;
+            }
+        }else{
+            if(*(p+1) == '2' && *(p+2) == '0'){
+                strcat(newbuf, blank);
+                p+=2;
+            }
+        }  
     }
-    return ret; 
+    return newbuf;  
 }
