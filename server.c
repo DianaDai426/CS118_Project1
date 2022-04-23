@@ -111,18 +111,17 @@ void respond(int fd)
     printf("the parsed_filename is %s\n", parsed_filename);
     
     //send message
-    char* errbuf = "<!DOCTYPE html><html><body><h1>404 not found</h1></body></html>";
+    //char* errbuf = "<!DOCTYPE html><html><body><h1>404 not found</h1></body></html>";
     FILE* file = fopen(parsed_filename,"r");
-    //handling empty file
-	if (file == NULL){
-		write(fd,errbuf,strlen(errbuf)+1);
-		return;
-	}
     
 	//find type 
+    if (file == NULL){ 
+        parsed_filename = "404.html";
+        file = fopen(parsed_filename, "r");
+    }
     char *ext = NULL;
     char* filetype = NULL;
-    ext = strrchr(filename, '.');
+    ext = strrchr(parsed_filename, '.');
     if(ext != NULL){
         filetype = ext + 1;
     }
@@ -150,6 +149,12 @@ void create_response(char* filename, char* type, int fd, FILE* file){
     char content_type[LINE_SIZE];
     memset(content_type, 0, LINE_SIZE);
 
+    //handling empty file
+	if (file == NULL){
+
+		//write(fd,errbuf,strlen(errbuf)+1);
+		//return;
+	}
 
     // date 
     time_t now = time(0);
